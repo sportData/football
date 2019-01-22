@@ -1,2 +1,2 @@
 # football
-Repository to store Football related data
+A repository to store Football related historical data.
