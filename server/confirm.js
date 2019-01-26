@@ -62,7 +62,9 @@ function readSummaryFile(seasonDir) {
     } catch (err) {
       
     } finally {
-      console.log(resultsData)
+      if (resultsData) {
+        console.log(resultsData)
+      }
     }
 
     seasonRecord.matches = seasonRecord.teams * (seasonRecord.teams - 1)
