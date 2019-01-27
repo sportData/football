@@ -1,3 +1,24 @@
 {
-  "ARS" : "Arsenal"
+  "ARS" : "Arsenal",
+  "AST" : "Aston Villa",
+  "BLB" : "Blackburn Rovers",
+  "CHE" : "Chelsea",
+  "COV" : "Coventry City",
+  "CRY" : "Crystal Palace",
+  "EVE" : "Everton",
+  "IPS" : "Ipswich Town",
+  "LEE" : "Leeds United",
+  "LIV" : "Liverpool",
+  "MCI" : "Manchester City",
+  "MID" : "Middlesbrough",
+  "MUN" : "Manchester United",
+  "NWC" : "Norwich City",
+  "NOT" : "Nottingham Forest",
+  "OLD" : "Oldham Athletic",
+  "QPR" : "Queens Park Rangers",
+  "SHU" : "Sheffield United",
+  "SHW" : "Sheffield Wednesday",
+  "SOU" : "Southampton",
+  "TOT" : "Tottenham Hotspur",
+  "WDN" : "Wimbledon"
 }

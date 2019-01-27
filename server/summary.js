@@ -12,7 +12,6 @@ function readDirectory(ctryData) {
   let leagueList = []
 
   for (let x = 0; x < ctryLength; ++x) {
-    console.log(ctryData[x])
     let leagueDirs = getDirectories(ctryData[x])
     leagueList = [...leagueList, ...leagueDirs]
   }
