@@ -165,11 +165,11 @@ function tableToRowdata(fileContents) {
         const homeGame = {}
         const score = homeGameList[y].split('–')
 
-        homeGame.homeTeam = teamList[x]
-        homeGame.awayTeam = teamList[y]
-        homeGame.homeScore = score[0]
-        homeGame.awayScore = score[1]
-        homeGame.id = ((x - 1) * 21) + z++
+        homeGame.H = teamList[x]
+        homeGame.A = teamList[y]
+        homeGame.S = score[0]
+        homeGame.C = score[1]
+        homeGame.I = ((x - 1) * 21) + z++
     
         eplTable.push(homeGame)
       }
@@ -212,8 +212,8 @@ function verifyData(summaryTable, teamTable, fullData) {
   const seasonData = {}
   
   for (let x = 0; x < fullDataLength; ++x) {
-    let at = fullData[x].awayTeam
-    let ht = fullData[x].homeTeam
+    let at = fullData[x].A
+    let ht = fullData[x].H
     if (!(seasonData.hasOwnProperty(ht))) {
       seasonData[ht] = {}
       seasonData[ht].T = teamTable[ht]
@@ -226,24 +226,24 @@ function verifyData(summaryTable, teamTable, fullData) {
       keyFields.forEach((e) => {seasonData[at][e] = 0})
     }
 
-    seasonData[ht].F += parseInt(fullData[x].homeScore, 10)
-    seasonData[ht].A += parseInt(fullData[x].awayScore, 10)
+    seasonData[ht].F += parseInt(fullData[x].S, 10)
+    seasonData[ht].A += parseInt(fullData[x].C, 10)
     seasonData[ht].G += 1
     seasonData[ht].I = fullData[x].id
 
-    seasonData[at].F += parseInt(fullData[x].awayScore, 10)
-    seasonData[at].A += parseInt(fullData[x].homeScore, 10)
+    seasonData[at].F += parseInt(fullData[x].C, 10)
+    seasonData[at].A += parseInt(fullData[x].S, 10)
     seasonData[at].G += 1
     seasonData[at].I = fullData[x].id
 
     
     
-    if ((parseInt(fullData[x].homeScore) === parseInt(fullData[x].awayScore))) {
+    if ((parseInt(fullData[x].S) === parseInt(fullData[x].C))) {
       seasonData[ht].P += 1
       seasonData[ht].D += 1
       seasonData[at].P += 1
       seasonData[at].D += 1
-    } else if ((parseInt(fullData[x].homeScore) > parseInt(fullData[x].awayScore))) {
+    } else if ((parseInt(fullData[x].S) > parseInt(fullData[x].C))) {
       seasonData[ht].P += 3
       seasonData[ht].W += 1
       seasonData[at].L += 1
