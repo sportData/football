@@ -4,7 +4,9 @@
   "description": "Football data viewer",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "summarize": "node server/writeSummary",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "verify": "node server/result2table.js"
   },
   "repository": {
     "type": "git",

@@ -1,6 +1,6 @@
 const assert = require('assert')
 const { readFileSync, writeFileSync } = require('fs')
-const { join, sep } = require('path')
+const { join } = require('path')
 const minimist = require('minimist')
 
 const consoleError = msg => console.error('\x1b[31m%s\x1b[0m', msg)
@@ -36,7 +36,7 @@ function printTable(printData, cli) {
   let errCount = 0
 
   for (let x = 0; x < leagueTableLength; ++x) {
-    console.log(''.padStart('78','-'))
+    console.log(''.padStart('84','-'))
     let diffCheck = false
     let errLocal = 0
     const r = lt[x]
@@ -45,16 +45,15 @@ function printTable(printData, cli) {
 
     const pe = (d,p) => d.toString().padEnd(p)
     const ps = (d,p) => d.toString().padStart(p)
-    const pz = (d,p) => d.toString().padStart(p,0)
     
-    let rowString = `| ${pe(r.T,32)} | ${ps(r.G,2)} | ${pz(r.W,2)} | ${pz(r.D,2)} | ${pz(r.L,2)} |`
-    rowString += ` ${ps(r.F,3)} | ${ps(r.A,2)} | ${ps(r.E,3)} | ${ps(r.P,2)} |`
+    let rowString = `| ${pe(r.T,32)} | ${ps(r.G,3)} | ${ps(r.W,3)} | ${ps(r.D,3)} | ${ps(r.L,3)} |`
+    rowString += ` ${ps(r.F,3)} | ${ps(r.A,3)} | ${ps(r.E,3)} | ${ps(r.P,3)} |`
 
     keyFields.forEach(e => { if (s[e] !== r[e]) { ++errLocal; diffCheck = true } })
 
     if (diffCheck === true) {
-      let rowStringDiff = `| ${pe(s.T,32)} | ${ps(s.G,2)} | ${pz(s.W,2)} | ${pz(s.D,2)} | ${pz(s.L,2)} |`
-      rowStringDiff += ` ${ps(s.F,3)} | ${ps(s.A,2)} | ${ps(s.E,3)} | ${ps(s.P,2)} |`
+      let rowStringDiff = `| ${pe(s.T,32)} | ${ps(s.G,2)} | ${ps(s.W,3)} | ${ps(s.D,3)} | ${ps(s.L,3)} |`
+      rowStringDiff += ` ${ps(s.F,3)} | ${ps(s.A,3)} | ${ps(s.E,3)} | ${ps(s.P,3)} |`
       consoleError(rowString)
       consoleError(rowStringDiff)
       consoleGreen(`ERRORS => ${errLocal}`)
@@ -66,11 +65,11 @@ function printTable(printData, cli) {
     
   }
 
-  console.log(''.padStart('78','-'))
+  console.log(''.padStart('84','-'))
 
   if (errCount > 0) {
     consoleGreen(`TOTAL ERRORS => ${errCount}`)
-    console.log(''.padStart('78','-'))
+    console.log(''.padStart('84','-'))
   } else {
     let fileString = `[\n`
 
@@ -196,6 +195,13 @@ function readSummaryFile(cli) {
   } finally {
     if (fileData) {
       outputData.data = JSON.parse(fileData)
+
+      if (outputData.data.name === 'noname') {
+        consoleError(`ERROR => The summary file for the season is incomplete`)
+        consoleError(`USAGE => This is usually caused by wrong season name`)
+        outputData.errMsg = `ERROR => The summary file for the season is incomplete`
+        outputData.errNo = -1
+      }
     }
   }
 
