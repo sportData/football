@@ -250,11 +250,11 @@ function verifyData(summaryTable, teamTable, fullData) {
       seasonData[at].P += 1
       seasonData[at].D += 1
     } else if ((parseInt(fullData[x].S) > parseInt(fullData[x].C))) {
-      seasonData[ht].P += 3
+      seasonData[ht].P += 2
       seasonData[ht].W += 1
       seasonData[at].L += 1
     } else {
-      seasonData[at].P += 3
+      seasonData[at].P += 2
       seasonData[at].W += 1
       seasonData[ht].L += 1
     }
