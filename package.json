@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/rahulkadukar/football#readme",
   "dependencies": {
+    "config": "^3.0.1",
     "http-server": "^0.11.1",
     "minimist": "^1.2.0"
   }
