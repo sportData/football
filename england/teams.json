@@ -12,6 +12,7 @@
   "MCI" : "Manchester City",
   "MID" : "Middlesbrough",
   "MUN" : "Manchester United",
+  "NEW" : "Newcastle United",
   "NWC" : "Norwich City",
   "NOT" : "Nottingham Forest",
   "OLD" : "Oldham Athletic",
@@ -19,6 +20,8 @@
   "SHU" : "Sheffield United",
   "SHW" : "Sheffield Wednesday",
   "SOU" : "Southampton",
+  "SWI" : "Swindon Town",
   "TOT" : "Tottenham Hotspur",
-  "WDN" : "Wimbledon"
+  "WDN" : "Wimbledon",
+  "WHU" : "West Ham United"
 }
