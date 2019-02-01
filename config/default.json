@@ -3,6 +3,10 @@
     "team" : {
       "e" : "england",
       "g" : "germany"
+    },
+    "league" : {
+      "pl" : "premierLeague",
+      "bl" : "bundesliga"
     }
   }
 }
