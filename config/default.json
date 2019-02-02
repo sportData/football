@@ -5,8 +5,14 @@
       "g" : "germany"
     },
     "league" : {
-      "pl" : "premierLeague",
-      "bl" : "bundesliga"
+      "pl" : {
+        "dir" : "premierLeague",
+        "name" : "English Premier League"
+      },
+      "bl" : {
+        "dir" : "bundesliga",
+        "name" : "German Bundesliga"
+      }
     }
   }
 }
