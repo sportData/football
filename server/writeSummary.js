@@ -1,4 +1,5 @@
 const assert = require('assert')
+const config = require('config')
 const { readFileSync, writeFileSync } = require('fs')
 const { join } = require('path')
 const minimist = require('minimist')
@@ -8,8 +9,13 @@ const consoleError = msg => console.error('\x1b[31m%s\x1b[0m', msg)
 const consoleGreen = msg => console.log('\x1b[32m%s\x1b[0m', msg)
 const consoleInfo = msg => console.log('\x1b[36m%s\x1b[0m', msg)
 
-const inputData = checkInput();
-assertCheck(inputData)
+const rawInputData = checkInput()
+assertCheck(rawInputData)
+
+const processedData = processRawInput(rawInputData)
+assertCheck(processedData)
+
+const inputData = processedData.cliArgs
 
 const fileContents = readFile(inputData)
 assertCheck(fileContents)
@@ -21,24 +27,69 @@ function checkInput() {
   cliArgs.errMsg = ''
   cliArgs.errNo = 0
   
-  if (!(cliArgs.hasOwnProperty('file'))) {
-    consoleError(`ERROR => Please enter argument --file to process`)
+  if (!(cliArgs.hasOwnProperty('f'))) {
+    consoleError(`ERROR => Please enter argument --f to process`)
     consoleError(`USAGE => file should be placed in the temp folder`)
-    cliArgs.errMsg = `ERROR => Argument --file not supplied`
+    cliArgs.errMsg = `ERROR => Argument --f (file) not supplied`
     cliArgs.errNo = -1
-  } else if(!(cliArgs.hasOwnProperty('team'))) {
-    consoleError(`ERROR => Please enter argument --team to process`)
-    consoleError(`USAGE => team name list is in README`)
-    cliArgs.errMsg = `ERROR => Argument --team not supplied`
+  } else if(!(cliArgs.hasOwnProperty('c'))) {
+    consoleError(`ERROR => Please enter argument --c to process`)
+    consoleError(`USAGE => country name list is in README`)
+    cliArgs.errMsg = `ERROR => Argument --c (country) not supplied`
     cliArgs.errNo = -2
-  } else if(!(cliArgs.hasOwnProperty('season'))) {
-    consoleError(`ERROR => Please enter argument --season to process`)
-    consoleError(`USAGE => season list is in README`)
-    cliArgs.errMsg = `ERROR => Argument --season not supplied`
+  } else if(!(cliArgs.hasOwnProperty('l'))) {
+    consoleError(`ERROR => Please enter argument --l to process`)
+    consoleError(`USAGE => league list is in README`)
+    cliArgs.errMsg = `ERROR => Argument --l (league) not supplied`
     cliArgs.errNo = -3
+  } else if(!(cliArgs.hasOwnProperty('s'))) {
+    consoleError(`ERROR => Please enter argument --s to process`)
+    consoleError(`USAGE => season list is in README`)
+    cliArgs.errMsg = `ERROR => Argument --s (season) not supplied`
+    cliArgs.errNo = -4
   }
 
   return cliArgs
+}
+
+function processRawInput(rawInput) {
+  let outData = {}
+  outData.errMsg = ''
+  outData.errNo = 0
+
+  const cliArgs = rawInput
+  const cliConfig = config.cli
+  const rgxYear = /^\d{4}$/
+
+  // Check if the entered value for country is correct
+  if (!(cliConfig.country.hasOwnProperty(cliArgs.c))) {
+    consoleError(`ERROR => Country ${cliArgs.c} not found, check config/default.json`)
+    consoleError(`USAGE => Determine correct country code => npm run config`)
+    outData.errMsg = `ERROR => Argument --c (country) Invalid value`
+    outData.errNo = -1
+  // Check if the entered value for league is correct
+  } else if (!(cliConfig.league.hasOwnProperty(cliArgs.l))) {
+    consoleError(`ERROR => League ${cliArgs.l} not found, check config/default.json`)
+    consoleError(`USAGE => Determine correct league code => npm run config`)
+    outData.errMsg = `ERROR => Argument --l (league) Invalid value`
+    outData.errNo = -1
+  // Check if the entered value for season is correct  
+  } else if (!(rgxYear.test(cliArgs.s))) {
+    consoleError(`ERROR => Season ${cliArgs.s} not a valid year, expected XXXX`)
+    consoleError(`USAGE => Enter correct season as a valid year, expected XXXX`)
+    outData.errMsg = `ERROR => Argument --s (season) Invalid value`
+    outData.errNo = -1
+  }
+
+  outData.cliArgs = {}
+  let seasonYear = parseInt(cliArgs.s, 10)
+
+  outData.cliArgs.file = cliArgs.f
+  outData.cliArgs.country = cliConfig.country[cliArgs.c]
+  outData.cliArgs.league = cliConfig.league[cliArgs.l]
+  outData.cliArgs.season = `${seasonYear}-${++seasonYear}`
+
+  return outData
 }
 
 function outputSummaryFile(inData, cliArgs) {
@@ -47,13 +98,13 @@ function outputSummaryFile(inData, cliArgs) {
   outData.errNo = 0
 
   let fileString = `{\n`
-  fileString += `  ` + `"name": "noname",\n`
+  fileString += `  ` + `"name": "${cliArgs.league.name} ${cliArgs.season} Season",\n`
   fileString += `  ` + `"teams": ${inData.length}, \n`
 
   const inDataLength = inData.length
 
   fileString += `  ` + `"table": [ \n`
-  for (let x = 0; x < inData.length; ++x) {
+  for (let x = 0; x < inDataLength; ++x) {
     fileString += `    ` + JSON.stringify(inData[x]) + `,\n`
   }
 
@@ -64,9 +115,10 @@ function outputSummaryFile(inData, cliArgs) {
   let writeFileFlag = true
 
   try {
-    writeFileSync(join(cliArgs.team, cliArgs.season, 'summary.json'), fileString)
+    writeFileSync(join(cliArgs.country, cliArgs.league.dir, cliArgs.season, 'summary.json'), fileString)
   } catch (err) {
     writeFileFlag = false
+    consoleError(err)
     consoleError(`ERROR => Error in writing the file summary.json for the season`)
   } finally {
     if (writeFileFlag) {
