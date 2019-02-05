@@ -1,4 +1,5 @@
 const assert = require('assert')
+const config = require('config')
 const { readFileSync, writeFileSync } = require('fs')
 const { join } = require('path')
 const minimist = require('minimist')
@@ -8,8 +9,13 @@ const consoleGreen = msg => console.log('\x1b[32m%s\x1b[0m', msg)
 const consoleInfo = msg => console.log('\x1b[36m%s\x1b[0m', msg)
 const assertCheck = fnData => assert(fnData.errNo === 0, fnData.errMsg)
 
-const inputData = checkInput();
-assertCheck(inputData)
+const rawInputData = checkInput();
+assertCheck(rawInputData)
+
+const processedData = processRawInput(rawInputData)
+assertCheck(processedData)
+
+const inputData = processedData.cliArgs
 
 const fileContents = readFile(inputData)
 assertCheck(fileContents)
@@ -82,7 +88,7 @@ function printTable(printData, cli) {
     fileString = fileString.slice(0, -2) + '\n'
     fileString += `]`
 
-    writeFileSync(join(cli.team, cli.season, 'matches.json'), fileString)
+    writeFileSync(join(cli.country, cli.league.dir, cli.season, 'matches.json'), fileString)
   }
 }
 
@@ -91,24 +97,69 @@ function checkInput() {
   cliArgs.errMsg = ''
   cliArgs.errNo = 0
   
-  if (!(cliArgs.hasOwnProperty('file'))) {
-    consoleError(`ERROR => Please enter argument --file to process`)
+  if (!(cliArgs.hasOwnProperty('f'))) {
+    consoleError(`ERROR => Please enter argument --f to process`)
     consoleError(`USAGE => file should be placed in the temp folder`)
-    cliArgs.errMsg = `ERROR => Argument --file not supplied`
+    cliArgs.errMsg = `ERROR => Argument --f (file) not supplied`
     cliArgs.errNo = -1
-  } else if(!(cliArgs.hasOwnProperty('team'))) {
-    consoleError(`ERROR => Please enter argument --team to process`)
-    consoleError(`USAGE => team name list is in README`)
-    cliArgs.errMsg = `ERROR => Argument --team not supplied`
+  } else if(!(cliArgs.hasOwnProperty('c'))) {
+    consoleError(`ERROR => Please enter argument --c to process`)
+    consoleError(`USAGE => country name list is in README`)
+    cliArgs.errMsg = `ERROR => Argument --c (country) not supplied`
     cliArgs.errNo = -2
-  } else if(!(cliArgs.hasOwnProperty('season'))) {
-    consoleError(`ERROR => Please enter argument --season to process`)
-    consoleError(`USAGE => season list is in README`)
-    cliArgs.errMsg = `ERROR => Argument --season not supplied`
+  } else if(!(cliArgs.hasOwnProperty('l'))) {
+    consoleError(`ERROR => Please enter argument --l to process`)
+    consoleError(`USAGE => league list is in README`)
+    cliArgs.errMsg = `ERROR => Argument --l (league) not supplied`
     cliArgs.errNo = -3
+  } else if(!(cliArgs.hasOwnProperty('s'))) {
+    consoleError(`ERROR => Please enter argument --s to process`)
+    consoleError(`USAGE => season list is in README`)
+    cliArgs.errMsg = `ERROR => Argument --s (season) not supplied`
+    cliArgs.errNo = -4
   }
 
   return cliArgs
+}
+
+function processRawInput(rawInput) {
+  let outData = {}
+  outData.errMsg = ''
+  outData.errNo = 0
+
+  const cliArgs = rawInput
+  const cliConfig = config.cli
+  const rgxYear = /^\d{4}$/
+
+  // Check if the entered value for country is correct
+  if (!(cliConfig.country.hasOwnProperty(cliArgs.c))) {
+    consoleError(`ERROR => Country ${cliArgs.c} not found, check config/default.json`)
+    consoleError(`USAGE => Determine correct country code => npm run config`)
+    outData.errMsg = `ERROR => Argument --c (country) Invalid value`
+    outData.errNo = -1
+  // Check if the entered value for league is correct
+  } else if (!(cliConfig.league.hasOwnProperty(cliArgs.l))) {
+    consoleError(`ERROR => League ${cliArgs.l} not found, check config/default.json`)
+    consoleError(`USAGE => Determine correct league code => npm run config`)
+    outData.errMsg = `ERROR => Argument --l (league) Invalid value`
+    outData.errNo = -1
+  // Check if the entered value for season is correct  
+  } else if (!(rgxYear.test(cliArgs.s))) {
+    consoleError(`ERROR => Season ${cliArgs.s} not a valid year, expected XXXX`)
+    consoleError(`USAGE => Enter correct season as a valid year, expected XXXX`)
+    outData.errMsg = `ERROR => Argument --s (season) Invalid value`
+    outData.errNo = -1
+  }
+
+  outData.cliArgs = {}
+  let seasonYear = parseInt(cliArgs.s, 10)
+
+  outData.cliArgs.file = cliArgs.f
+  outData.cliArgs.country = cliConfig.country[cliArgs.c]
+  outData.cliArgs.league = cliConfig.league[cliArgs.l]
+  outData.cliArgs.season = `${seasonYear}-${++seasonYear}`
+
+  return outData
 }
 
 function readFile(inputData) {
@@ -156,7 +207,7 @@ function tableToRowdata(fileContents) {
   for(let x = 1; x < fileContentsLength; ++x) {
     const homeGameList = fileContents[x].split('\t')
     const homeGameLength = homeGameList.length
-    let z = 1
+    let z = 0
 
     for (let y = 1; y < homeGameLength; ++y) {
 
@@ -168,8 +219,8 @@ function tableToRowdata(fileContents) {
         homeGame.A = teamList[y]
         homeGame.S = score[0]
         homeGame.C = score[1]
-        homeGame.I = ((x - 1) * 21) + z++
-    
+        homeGame.I = ++z
+
         eplTable.push(homeGame)
       }
     }
@@ -186,7 +237,7 @@ function readSummaryFile(cli) {
   outputData.errNo = 0
 
   try {
-    fileData = readFileSync(join(cli.team, cli.season, 'summary.json'), 'utf-8')
+    fileData = readFileSync(join(cli.country, cli.league.dir, cli.season, 'summary.json'), 'utf-8')
   } catch (err) {
     consoleError(`ERROR => Unable to read file the ${cli.team} ${cli.season}`)
     consoleError(`USAGE => file should be placed in the season folder`)
@@ -250,11 +301,11 @@ function verifyData(summaryTable, teamTable, fullData) {
       seasonData[at].P += 1
       seasonData[at].D += 1
     } else if ((parseInt(fullData[x].S) > parseInt(fullData[x].C))) {
-      seasonData[ht].P += 2
+      seasonData[ht].P += 3
       seasonData[ht].W += 1
       seasonData[at].L += 1
     } else {
-      seasonData[at].P += 2
+      seasonData[at].P += 3
       seasonData[at].W += 1
       seasonData[ht].L += 1
     }
@@ -266,8 +317,8 @@ function verifyData(summaryTable, teamTable, fullData) {
   let teamRecord = Object.values(seasonData)
 
   let sortedTeam = teamRecord.sort((a,b) => {
-    let aS = (a.P * 10000 + a.E * 100 + a.G * 1)
-    let bS = (b.P * 10000 + b.E * 100 + b.G * 1)
+    let aS = (a.P * 10000 + a.E * 100 + a.F * 1)
+    let bS = (b.P * 10000 + b.E * 100 + b.F * 1)
 
     if (aS < bS)
       return 1
@@ -290,7 +341,7 @@ function verifyTeams(fileContents, inputData) {
   outputData.errNo = 0
 
   try {
-    fileData = readFileSync(join(inputData.team, 'teams.json'), 'utf-8')
+    fileData = readFileSync(join(inputData.country, 'teams.json'), 'utf-8')
   } catch (err) {
     consoleError(`ERROR => Unable to read the team file for ${inputData.team}`)
     consoleError(`USAGE => Ensure that there is a teams.json file in the ${inputData.team} folder`)
