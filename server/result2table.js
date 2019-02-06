@@ -29,10 +29,76 @@ assertCheck(tableToRow)
 const readSummary = readSummaryFile(inputData)
 assertCheck(readSummary)
 
-const finalTable = verifyData(readSummary.data, teamData.data, tableToRow.data)
+const finalTable = verifyData(readSummary.data, teamData.data, tableToRow.data, inputData)
 assertCheck(finalTable)
 
 printTable(finalTable, inputData)
+
+function checkInput() {
+  const cliArgs = minimist(process.argv.slice(2));
+  cliArgs.errMsg = ''
+  cliArgs.errNo = 0
+  
+  if (!(cliArgs.hasOwnProperty('f'))) {
+    consoleError(`ERROR => Please enter argument --f to process`)
+    consoleError(`USAGE => file should be placed in the temp folder`)
+    cliArgs.errMsg = `ERROR => Argument --f (file) not supplied`
+    cliArgs.errNo = -1
+  } else if(!(cliArgs.hasOwnProperty('c'))) {
+    consoleError(`ERROR => Please enter argument --c to process`)
+    consoleError(`USAGE => country name list is in README`)
+    cliArgs.errMsg = `ERROR => Argument --c (country) not supplied`
+    cliArgs.errNo = -2
+  } else if(!(cliArgs.hasOwnProperty('l'))) {
+    consoleError(`ERROR => Please enter argument --l to process`)
+    consoleError(`USAGE => league list is in README`)
+    cliArgs.errMsg = `ERROR => Argument --l (league) not supplied`
+    cliArgs.errNo = -3
+  } else if(!(cliArgs.hasOwnProperty('s'))) {
+    consoleError(`ERROR => Please enter argument --s to process`)
+    consoleError(`USAGE => season list is in README`)
+    cliArgs.errMsg = `ERROR => Argument --s (season) not supplied`
+    cliArgs.errNo = -4
+  }
+
+  return cliArgs
+}
+
+function makeCorrections(seasonRecord) {
+  const cliArgs = minimist(process.argv.slice(2));
+  const correctionData = config.fixes
+
+  let teamRecord = []
+  let makeFix = {}
+
+  makeFix.status = false
+
+  correctionData.forEach((fixData) => {
+    if (
+      cliArgs.c === fixData.c && 
+      cliArgs.l === fixData.l &&
+      parseInt(cliArgs.s, 10) === parseInt(fixData.s, 10)
+    ) {
+      makeFix.status = true
+      makeFix.team = fixData.t
+      makeFix.penalty = parseInt(fixData.p, 10)
+    }
+  })
+
+  if (makeFix.status === false) {
+    teamRecord = [...seasonRecord]
+  } else {
+    teamRecord = seasonRecord.map((teamData) => {
+      if (teamData.T === makeFix.team) {
+        teamData.P = teamData.P + makeFix.penalty
+      }
+
+      return teamData
+    })
+  }
+
+  return teamRecord
+}
 
 function printTable(printData, cli) {
   const lt = printData.summary.table
@@ -92,36 +158,6 @@ function printTable(printData, cli) {
   }
 }
 
-function checkInput() {
-  const cliArgs = minimist(process.argv.slice(2));
-  cliArgs.errMsg = ''
-  cliArgs.errNo = 0
-  
-  if (!(cliArgs.hasOwnProperty('f'))) {
-    consoleError(`ERROR => Please enter argument --f to process`)
-    consoleError(`USAGE => file should be placed in the temp folder`)
-    cliArgs.errMsg = `ERROR => Argument --f (file) not supplied`
-    cliArgs.errNo = -1
-  } else if(!(cliArgs.hasOwnProperty('c'))) {
-    consoleError(`ERROR => Please enter argument --c to process`)
-    consoleError(`USAGE => country name list is in README`)
-    cliArgs.errMsg = `ERROR => Argument --c (country) not supplied`
-    cliArgs.errNo = -2
-  } else if(!(cliArgs.hasOwnProperty('l'))) {
-    consoleError(`ERROR => Please enter argument --l to process`)
-    consoleError(`USAGE => league list is in README`)
-    cliArgs.errMsg = `ERROR => Argument --l (league) not supplied`
-    cliArgs.errNo = -3
-  } else if(!(cliArgs.hasOwnProperty('s'))) {
-    consoleError(`ERROR => Please enter argument --s to process`)
-    consoleError(`USAGE => season list is in README`)
-    cliArgs.errMsg = `ERROR => Argument --s (season) not supplied`
-    cliArgs.errNo = -4
-  }
-
-  return cliArgs
-}
-
 function processRawInput(rawInput) {
   let outData = {}
   outData.errMsg = ''
@@ -138,7 +174,7 @@ function processRawInput(rawInput) {
     outData.errMsg = `ERROR => Argument --c (country) Invalid value`
     outData.errNo = -1
   // Check if the entered value for league is correct
-  } else if (!(cliConfig.league.hasOwnProperty(cliArgs.l))) {
+  } else if (!(cliConfig.league[cliArgs.c].hasOwnProperty(cliArgs.l))) {
     consoleError(`ERROR => League ${cliArgs.l} not found, check config/default.json`)
     consoleError(`USAGE => Determine correct league code => npm run config`)
     outData.errMsg = `ERROR => Argument --l (league) Invalid value`
@@ -154,9 +190,26 @@ function processRawInput(rawInput) {
   outData.cliArgs = {}
   let seasonYear = parseInt(cliArgs.s, 10)
 
+  let ptsTable = cliConfig.league[cliArgs.c][cliArgs.l].pts
+  let ptsGame = -1
+
+  ptsTable.forEach((ptsData) => {
+    if (ptsData.b <= seasonYear && ptsData.e >= seasonYear) {
+      ptsGame = ptsData.p
+    } 
+  })
+
+  if (ptsGame === -1) {
+    consoleError(`ERROR => Points are not mapped for the season`)
+    consoleError(`USAGE => Determine point configuration => npm run config`)
+    outData.errMsg = `ERROR => Points are not mapped for the season`
+    outData.errNo = -1
+  }
+
   outData.cliArgs.file = cliArgs.f
   outData.cliArgs.country = cliConfig.country[cliArgs.c]
-  outData.cliArgs.league = cliConfig.league[cliArgs.l]
+  outData.cliArgs.league = cliConfig.league[cliArgs.c][cliArgs.l]
+  outData.cliArgs.points = ptsGame
   outData.cliArgs.season = `${seasonYear}-${++seasonYear}`
 
   return outData
@@ -192,6 +245,35 @@ function readFile(inputData) {
 
     return outputData
   }
+}
+
+function readSummaryFile(cli) {
+  let fileData
+  let outputData = {}
+  outputData.errMsg = ''
+  outputData.errNo = 0
+
+  try {
+    fileData = readFileSync(join(cli.country, cli.league.dir, cli.season, 'summary.json'), 'utf-8')
+  } catch (err) {
+    consoleError(`ERROR => Unable to read file the ${cli.team} ${cli.season}`)
+    consoleError(`USAGE => file should be placed in the season folder`)
+    outputData.errMsg = `ERROR => Unable to read the file ${cli.team} ${cli.season}`
+    outputData.errNo = -1
+  } finally {
+    if (fileData) {
+      outputData.data = JSON.parse(fileData)
+
+      if (outputData.data.name === 'noname') {
+        consoleError(`ERROR => The summary file for the season is incomplete`)
+        consoleError(`USAGE => This is usually caused by wrong season name`)
+        outputData.errMsg = `ERROR => The summary file for the season is incomplete`
+        outputData.errNo = -1
+      }
+    }
+  }
+
+  return outputData
 }
 
 function tableToRowdata(fileContents) {
@@ -231,36 +313,7 @@ function tableToRowdata(fileContents) {
   return outputData
 }
 
-function readSummaryFile(cli) {
-  let fileData
-  let outputData = {}
-  outputData.errMsg = ''
-  outputData.errNo = 0
-
-  try {
-    fileData = readFileSync(join(cli.country, cli.league.dir, cli.season, 'summary.json'), 'utf-8')
-  } catch (err) {
-    consoleError(`ERROR => Unable to read file the ${cli.team} ${cli.season}`)
-    consoleError(`USAGE => file should be placed in the season folder`)
-    outputData.errMsg = `ERROR => Unable to read the file ${cli.team} ${cli.season}`
-    outputData.errNo = -1
-  } finally {
-    if (fileData) {
-      outputData.data = JSON.parse(fileData)
-
-      if (outputData.data.name === 'noname') {
-        consoleError(`ERROR => The summary file for the season is incomplete`)
-        consoleError(`USAGE => This is usually caused by wrong season name`)
-        outputData.errMsg = `ERROR => The summary file for the season is incomplete`
-        outputData.errNo = -1
-      }
-    }
-  }
-
-  return outputData
-}
-
-function verifyData(summaryTable, teamTable, fullData) {
+function verifyData(summaryTable, teamTable, fullData, inputData) {
   let outputData = {}
   outputData.errMsg = ''
   outputData.errNo = 0
@@ -294,19 +347,17 @@ function verifyData(summaryTable, teamTable, fullData) {
     seasonData[at].G += 1
     seasonData[at].I = fullData[x].id
 
-    
-    
     if ((parseInt(fullData[x].S) === parseInt(fullData[x].C))) {
       seasonData[ht].P += 1
       seasonData[ht].D += 1
       seasonData[at].P += 1
       seasonData[at].D += 1
     } else if ((parseInt(fullData[x].S) > parseInt(fullData[x].C))) {
-      seasonData[ht].P += 3
+      seasonData[ht].P += inputData.points
       seasonData[ht].W += 1
       seasonData[at].L += 1
     } else {
-      seasonData[at].P += 3
+      seasonData[at].P += inputData.points
       seasonData[at].W += 1
       seasonData[ht].L += 1
     }
@@ -315,11 +366,12 @@ function verifyData(summaryTable, teamTable, fullData) {
     seasonData[at].E = seasonData[at].F - seasonData[at].A
   }
 
-  let teamRecord = Object.values(seasonData)
+  let seasonRecord = Object.values(seasonData)
+  let teamRecord = makeCorrections(seasonRecord, inputData)
 
   let sortedTeam = teamRecord.sort((a,b) => {
-    let aS = (a.P * 10000 + a.E * 100 + a.F * 1)
-    let bS = (b.P * 10000 + b.E * 100 + b.F * 1)
+    let aS = (a.P * 10000 + a.E * 100 + a.F)
+    let bS = (b.P * 10000 + b.E * 100 + b.F)
 
     if (aS < bS)
       return 1

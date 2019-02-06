@@ -68,7 +68,7 @@ function processRawInput(rawInput) {
     outData.errMsg = `ERROR => Argument --c (country) Invalid value`
     outData.errNo = -1
   // Check if the entered value for league is correct
-  } else if (!(cliConfig.league.hasOwnProperty(cliArgs.l))) {
+  } else if (!(cliConfig.league[cliArgs.c].hasOwnProperty(cliArgs.l))) {
     consoleError(`ERROR => League ${cliArgs.l} not found, check config/default.json`)
     consoleError(`USAGE => Determine correct league code => npm run config`)
     outData.errMsg = `ERROR => Argument --l (league) Invalid value`
@@ -86,7 +86,7 @@ function processRawInput(rawInput) {
 
   outData.cliArgs.file = cliArgs.f
   outData.cliArgs.country = cliConfig.country[cliArgs.c]
-  outData.cliArgs.league = cliConfig.league[cliArgs.l]
+  outData.cliArgs.league = cliConfig.league[cliArgs.c][cliArgs.l]
   outData.cliArgs.season = `${seasonYear}-${++seasonYear}`
 
   return outData

@@ -5,14 +5,30 @@
       "g" : "germany"
     },
     "league" : {
-      "pl" : {
-        "dir" : "premierLeague",
-        "name" : "English Premier League"
+      "e": {
+        "pl" : {
+          "dir" : "premierLeague",
+          "name" : "English Premier League",
+          "pts": [
+            { "b" : 1992, "e" : 2019, "p" : 3 }
+          ]
+        }
       },
-      "bl" : {
-        "dir" : "bundesliga",
-        "name" : "German Bundesliga"
+      "g": {
+        "bl" : {
+          "dir" : "bundesliga",
+          "name" : "German Bundesliga",
+          "pts" : [
+            { "b" : 1992, "e" : 2019, "p" : 2 }
+          ]
+        }
       }
     }
-  }
+  },
+  "fixes" : [
+    { 
+      "a" : "Blackburn Rovers", "c" : "e" , "l": "pl" , "s" : "1996",
+      "t" : "Middlesbrough", "p" : -3 , "g" : 0
+    }
+  ]
 }

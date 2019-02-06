@@ -1,3 +1,3 @@
 const config = require('config')
 
-console.log(config.cli)
+console.log(JSON.stringify(config.cli))
