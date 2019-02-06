@@ -11,7 +11,9 @@
           "name" : "English Premier League",
           "pts": [
             { "b" : 1992, "e" : 2019, "p" : 3 }
-          ]
+          ],
+          "year": { "b" : 1992, "e" : 2019},
+          "yearExcp" : []
         }
       },
       "g": {
@@ -19,16 +21,15 @@
           "dir" : "bundesliga",
           "name" : "German Bundesliga",
           "pts" : [
-            { "b" : 1992, "e" : 2019, "p" : 2 }
-          ]
+            { "b" : 1963, "e" : 2019, "p" : 2 }
+          ],
+          "year": { "b" : 1963, "e" : 2019},
+          "yearExcp" : []
         }
       }
     }
   },
   "fixes" : [
-    { 
-      "a" : "Blackburn Rovers", "c" : "e" , "l": "pl" , "s" : "1996",
-      "t" : "Middlesbrough", "p" : -3 , "g" : 0
-    }
+    { "a" : "Blackburn Rovers", "c" : "e" , "l": "pl" , "s" : "1996", "t" : "Middlesbrough", "p" : -3 , "g" : 0 }
   ]
 }

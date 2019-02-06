@@ -41,7 +41,7 @@ function readSummaryFile(seasonDir) {
     const seasonRecord = ftblSumm[lds[0]][lds[1]][lds[2]]
 
     let summaryFile = join(seasonDir[x], 'summary.json')
-    let resultsFile = join(seasonDir[x], 'results.json')
+    let resultsFile = join(seasonDir[x], 'matches.json')
     let summaryData
     let resultsData
 
