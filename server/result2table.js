@@ -204,10 +204,11 @@ function tableToRowdata(fileContents) {
   const teamList = fileContents[0].split('\t')
   const fileContentsLength = fileContents.length
 
+  let z = 0
+
   for(let x = 1; x < fileContentsLength; ++x) {
     const homeGameList = fileContents[x].split('\t')
     const homeGameLength = homeGameList.length
-    let z = 0
 
     for (let y = 1; y < homeGameLength; ++y) {
 
