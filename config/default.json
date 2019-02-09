@@ -30,6 +30,7 @@
     }
   },
   "fixes" : [
-    { "a" : "Blackburn Rovers", "c" : "e" , "l": "pl" , "s" : "1996", "t" : "Middlesbrough", "p" : -3 , "g" : 0 }
+    { "c" : "e", "l": "pl", "s" : "1996", "t" : "Middlesbrough", "p" : -3 , "g" : 0 },
+    { "c" : "g", "l": "bl", "s" : "1993", "t": "Dynamo Dresden", "p" : -4, "g" : 0}
   ]
 }
