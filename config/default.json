@@ -21,7 +21,8 @@
           "dir" : "bundesliga",
           "name" : "German Bundesliga",
           "pts" : [
-            { "b" : 1963, "e" : 2019, "p" : 2 }
+            { "b" : 1963, "e" : 1994, "p" : 2 },
+            { "b" : 1995, "e" : 2019, "p" : 3 }
           ],
           "year": { "b" : 1963, "e" : 2019},
           "yearExcp" : []
