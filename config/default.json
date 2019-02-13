@@ -6,6 +6,15 @@
     },
     "league" : {
       "e": {
+        "ch" : {
+          "dir" : "championship",
+          "name" : "Football League",
+          "pts": [
+            { "b" : 1992, "e" : 2019, "p" : 3 }
+          ],
+          "year": { "b" : 1888, "e" : 2019},
+          "yearExcp" : []
+        },
         "pl" : {
           "dir" : "premierLeague",
           "name" : "English Premier League",

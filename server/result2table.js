@@ -368,19 +368,35 @@ function verifyData(summaryTable, teamTable, fullData, inputData) {
 
   let seasonRecord = Object.values(seasonData)
   let teamRecord = makeCorrections(seasonRecord, inputData)
+  let sortedTeam = []
 
-  let sortedTeam = teamRecord.sort((a,b) => {
-    let aS = (a.P * 10000 + a.E * 100 + a.F)
-    let bS = (b.P * 10000 + b.E * 100 + b.F)
+  if (inputData.country === 'england' &&
+      inputData.league.dir === 'championship' &&
+      inputData.season.slice(0,4) === '1992') {
+    sortedTeam = teamRecord.sort((a, b) => {
+      let aS = (a.P * 10000 + a.F)
+      let bS = (b.P * 10000 + b.F)
 
-    if (aS < bS)
-      return 1
-    else if (aS > bS)
-      return -1
-    else
-      return 0
-  })
+      if (aS < bS)
+        return 1
+      else if (aS > bS)
+        return -1
+      else
+        return 0
+    })
+  } else {
+    sortedTeam = teamRecord.sort((a, b) => {
+      let aS = (a.P * 10000 + a.E * 100 + a.F)
+      let bS = (b.P * 10000 + b.E * 100 + b.F)
 
+      if (aS < bS)
+        return 1
+      else if (aS > bS)
+        return -1
+      else
+        return 0
+    })
+  }
   outputData.data = sortedTeam
   outputData.summary = summaryTable
 
