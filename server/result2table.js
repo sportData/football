@@ -372,7 +372,7 @@ function verifyData(summaryTable, teamTable, fullData, inputData) {
 
   if (inputData.country === 'england' &&
       inputData.league.dir === 'championship' &&
-      inputData.season.slice(0,4) === '1992') {
+      (parseInt(inputData.season.slice(0,4), 10) >= 1992 && parseInt(inputData.season.slice(0,4), 10) <= 1993)) {
     sortedTeam = teamRecord.sort((a, b) => {
       let aS = (a.P * 10000 + a.F)
       let bS = (b.P * 10000 + b.F)
