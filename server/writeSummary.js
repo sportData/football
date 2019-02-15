@@ -163,7 +163,7 @@ function readFile(inputData) {
           if (columnList[y] === 'T') {
             summaryRow[columnList[y]] = rowData[y]    
           } else if (columnList[y] === 'E') {
-            summaryRow[columnList[y]] = parseInt(rowData[y].toString().replace("\u2212", "-"), 10)
+            summaryRow[columnList[y]] = parseInt(rowData[y].toString(), 10)
           } else {
             summaryRow[columnList[y]] = parseInt(rowData[y], 10)
           }
