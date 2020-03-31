@@ -24,8 +24,8 @@
   "homepage": "https://github.com/rahulkadukar/football#readme",
   "dependencies": {
     "config": "^3.0.1",
-    "http-server": "^0.11.1",
-    "minimist": "^1.2.0"
+    "http-server": "^0.12.1",
+    "minimist": "^1.2.5"
   },
   "devDependencies": {
     "pre-commit": "^1.2.2"
